@@ -83,6 +83,34 @@
     b.addEventListener('click', function () { renderPubs(b.dataset.mode); });
   });
 
+  // Intersection Observer for scroll animations
+  function observeElements() {
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry, index) {
+        if (entry.isIntersecting) {
+          // Stagger the animation for each card
+          var delay = Array.from(entry.target.parentNode.children).indexOf(entry.target) * 100;
+          setTimeout(function () {
+            entry.target.classList.add('visible');
+          }, delay);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.pub, .news-item').forEach(function (el) {
+      observer.observe(el);
+    });
+  }
+
   renderNews();
   renderPubs(location.hash === '#all' ? 'all' : 'selected');
+  observeElements();
+
+  // Re-observe when switching tabs
+  var originalRenderPubs = renderPubs;
+  renderPubs = function (mode) {
+    originalRenderPubs(mode);
+    observeElements();
+  };
 })();
