@@ -8,15 +8,33 @@
     return n;
   };
 
+  var NEWS_LIMIT = 5;
+  var newsExpanded = false;
+
   function renderNews() {
     var host = document.getElementById('news');
     host.textContent = '';
-    window.SITE.news.forEach(function (n) {
+    var newsToShow = newsExpanded ? window.SITE.news : window.SITE.news.slice(0, NEWS_LIMIT);
+
+    newsToShow.forEach(function (n, i) {
       var row = el('div', 'news-item');
+      row.style.animationDelay = (i * 0.04) + 's';
       row.appendChild(el('span', 'news-date', n.date));
-      row.appendChild(el('span', null, n.text));
+      var textSpan = el('span');
+      textSpan.innerHTML = n.text;
+      row.appendChild(textSpan);
       host.appendChild(row);
     });
+
+    // Add More/Less button if there are more than NEWS_LIMIT items
+    if (window.SITE.news.length > NEWS_LIMIT) {
+      var btn = el('button', 'news-toggle', newsExpanded ? 'Show less' : 'More');
+      btn.addEventListener('click', function () {
+        newsExpanded = !newsExpanded;
+        renderNews();
+      });
+      host.appendChild(btn);
+    }
   }
 
   function thumb(p) {
@@ -60,6 +78,17 @@
       a.href = l[1];
       links.appendChild(a);
     });
+    // Add BibTeX button if bibtex exists
+    if (p.bibtex) {
+      var bibBtn = el('button', 'bib-btn', 'BibTeX');
+      bibBtn.addEventListener('click', function () {
+        navigator.clipboard.writeText(p.bibtex).then(function () {
+          bibBtn.textContent = 'Copied!';
+          setTimeout(function () { bibBtn.textContent = 'BibTeX'; }, 1500);
+        });
+      });
+      links.appendChild(bibBtn);
+    }
     body.appendChild(links);
 
     wrap.appendChild(body);
@@ -69,9 +98,21 @@
   function renderPubs(mode) {
     var host = document.getElementById('pubs');
     host.textContent = '';
-    window.SITE.publications
-      .filter(function (p) { return mode === 'all' || p.selected; })
-      .forEach(function (p) { host.appendChild(card(p)); });
+    var pubs = window.SITE.publications
+      .filter(function (p) { return mode === 'all' || p.selected; });
+
+    // Sort by 'order' property in Selected mode (lower number = higher priority)
+    if (mode === 'selected') {
+      pubs.sort(function (a, b) {
+        return (a.order || 999) - (b.order || 999);
+      });
+    }
+
+    pubs.forEach(function (p, i) {
+        var c = card(p);
+        c.style.animationDelay = (i * 0.06) + 's';
+        host.appendChild(c);
+      });
 
     document.querySelectorAll('.toggle button').forEach(function (b) {
       b.setAttribute('aria-selected', String(b.dataset.mode === mode));
@@ -83,34 +124,6 @@
     b.addEventListener('click', function () { renderPubs(b.dataset.mode); });
   });
 
-  // Intersection Observer for scroll animations
-  function observeElements() {
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry, index) {
-        if (entry.isIntersecting) {
-          // Stagger the animation for each card
-          var delay = Array.from(entry.target.parentNode.children).indexOf(entry.target) * 100;
-          setTimeout(function () {
-            entry.target.classList.add('visible');
-          }, delay);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-    document.querySelectorAll('.pub, .news-item').forEach(function (el) {
-      observer.observe(el);
-    });
-  }
-
   renderNews();
   renderPubs(location.hash === '#all' ? 'all' : 'selected');
-  observeElements();
-
-  // Re-observe when switching tabs
-  var originalRenderPubs = renderPubs;
-  renderPubs = function (mode) {
-    originalRenderPubs(mode);
-    observeElements();
-  };
 })();
