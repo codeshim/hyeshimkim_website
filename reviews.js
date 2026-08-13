@@ -1,4 +1,4 @@
-// Renders reviews-data.js, topic filter, and click-to-load YouTube players.
+// Renders reviews-data.js, topic filter, and click-to-load PDF viewers.
 (function () {
   var el = function (tag, cls, text) {
     var n = document.createElement(tag);
@@ -8,28 +8,56 @@
   };
   var topic = 'All';
 
-  function player(r) {
-    var btn = el('button', 'video');
-    btn.type = 'button';
-    btn.setAttribute('aria-label', 'Play review of ' + r.title);
-    if (r.youtube) {
-      btn.style.backgroundImage = 'url(https://i.ytimg.com/vi/' + r.youtube + '/maxresdefault.jpg)';
-    }
-    var overlay = el('div', 'video-play');
-    overlay.appendChild(el('span', null, '\u25b6'));
-    btn.appendChild(overlay);
-    btn.addEventListener('click', function () {
-      if (!r.youtube) return;
+  // The viewer starts as a compact button. On click, it expands to show the PDF.
+  // Browsers without an inline PDF plugin fall back to the "Open in new tab" link.
+  function viewer(r) {
+    var wrap = el('div', 'slides-wrap');
+
+    var cover = el('button', 'slides-cover');
+    cover.type = 'button';
+    cover.setAttribute('aria-label', 'Open slides for ' + r.title);
+    cover.appendChild(el('span', null, 'View slides'));
+    if (r.pages) cover.appendChild(el('small', null, r.pages));
+    wrap.appendChild(cover);
+
+    function showViewer() {
+      if (!r.pdf) return;
+      // Replace button with expanded viewer
+      var frame = el('div', 'slides');
       var f = document.createElement('iframe');
-      f.src = 'https://www.youtube-nocookie.com/embed/' + r.youtube + '?autoplay=1&rel=0';
-      f.title = r.title;
-      f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture';
-      f.allowFullscreen = true;
-      btn.textContent = '';
-      btn.style.cursor = 'default';
-      btn.appendChild(f);
-    }, { once: true });
-    return btn;
+      f.src = r.pdf + '#view=FitH&toolbar=1';
+      f.title = 'Slides — ' + r.title;
+      frame.appendChild(f);
+
+      var bar = el('div', 'slides-bar');
+      var open = el('a', null, 'Open in new tab \u2197');
+      open.href = r.pdf; open.target = '_blank'; open.rel = 'noopener';
+      var hide = el('button', 'slides-hide', 'Hide slides');
+      hide.type = 'button';
+      hide.addEventListener('click', showButton);
+      bar.appendChild(open);
+      bar.appendChild(el('span', null, '\u00b7'));
+      bar.appendChild(hide);
+
+      wrap.textContent = '';
+      wrap.appendChild(frame);
+      wrap.appendChild(bar);
+    }
+
+    function showButton() {
+      wrap.textContent = '';
+      var btn = el('button', 'slides-cover');
+      btn.type = 'button';
+      btn.setAttribute('aria-label', 'Open slides for ' + r.title);
+      btn.appendChild(el('span', null, 'View slides'));
+      if (r.pages) btn.appendChild(el('small', null, r.pages));
+      btn.addEventListener('click', showViewer);
+      wrap.appendChild(btn);
+    }
+
+    cover.addEventListener('click', showViewer);
+
+    return wrap;
   }
 
   function card(r) {
@@ -41,7 +69,7 @@
     meta.appendChild(el('span', 'year', String(r.year)));
     if (r.award) meta.appendChild(el('span', 'award', '\u00b7 ' + r.award));
     meta.appendChild(el('span', 'spacer'));
-    if (r.length) meta.appendChild(el('span', 'length', r.length));
+    if (r.pages) meta.appendChild(el('span', 'pages', r.pages));
     head.appendChild(meta);
     head.appendChild(el('h3', 'pub-title', r.title));
     var authors = el('div', 'pub-authors');
@@ -49,9 +77,16 @@
       authors.appendChild(el('span', null, i < r.authors.length - 1 ? a + ',' : a));
     });
     head.appendChild(authors);
+    if (r.keywords && r.keywords.length) {
+      var kw = el('div', 'keywords');
+      r.keywords.forEach(function (k) {
+        kw.appendChild(el('span', 'keyword', k));
+      });
+      head.appendChild(kw);
+    }
     wrap.appendChild(head);
 
-    wrap.appendChild(player(r));
+    wrap.appendChild(viewer(r));
 
     var foot = el('div', 'review-foot');
     foot.appendChild(el('span', 'review-date', 'Reviewed ' + r.date));
@@ -90,7 +125,7 @@
       host.appendChild(c);
     });
     document.getElementById('count').textContent =
-      items.length + (items.length === 1 ? ' recorded review' : ' recorded reviews');
+      items.length + (items.length === 1 ? ' paper review' : ' paper reviews');
     document.querySelectorAll('#topics button').forEach(function (b) {
       b.setAttribute('aria-selected', String(b.dataset.topic === topic));
     });
