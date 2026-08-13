@@ -125,7 +125,7 @@
       host.appendChild(c);
     });
     document.getElementById('count').textContent =
-      items.length + (items.length === 1 ? ' paper review' : ' paper reviews');
+      items.length + (items.length === 1 ? ' paper reading' : ' paper readings');
     document.querySelectorAll('#topics button').forEach(function (b) {
       b.setAttribute('aria-selected', String(b.dataset.topic === topic));
     });
