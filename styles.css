@@ -115,6 +115,7 @@ a:hover{color:#b2622d}
   .intro .portrait{grid-column:1; grid-row:2; width:100%; height:auto; aspect-ratio:1/1}
   .intro .intro-text{grid-column:1; grid-row:3}
   .name{font-size:38px}
+  .section-head{flex-direction:column; align-items:flex-start}
   .pub{grid-template-columns:1fr; gap:16px}
   .pub-thumb{width:100%; max-width:100%}
   .news-date{width:72px}
