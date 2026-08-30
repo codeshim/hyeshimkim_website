@@ -2,6 +2,7 @@
 // { date: 'Jul. 2026', text: '<a href="https://codeshim.github.io/transpace/">TranSpace</a> is recommended for oral presentation at ACM Multimedia (MM) 2026.' },
 window.SITE = {
   news: [
+    { date: 'Aug. 2026', text: '<a href="https://codeshim.github.io/transpace/">TranSpace</a> is selected for Oral Presentation at ACM Multimedia (MM) 2026.' },
     { date: 'Aug. 2026', text: 'Neighborhood is accepted to ACM UIST 2026.' },
     { date: 'Jul. 2026', text: '<a href="https://codeshim.github.io/transpace/">TranSpace</a> is accepted to ACM Multimedia (MM) 2026.' },
     { date: 'Nov. 2025', text: '<a href="https://hayleymol.github.io/VoronoiRooms_TOG/">Voronoi Rooms</a> is accepted to ACM Transactions on Graphics (TOG).' },
@@ -30,7 +31,7 @@ window.SITE = {
       order: 1,
       title: 'TranSpace: Progressive Anchoring for Metric-Consistent Scene Synthesis',
       authors: ['Hyeshim Kim', 'Taehei Kim*', 'Jihun Shin*', 'Hyeonjin Kim', 'Sung-Hee Lee'],
-      venue: 'ACM Multimedia', year: 2026, award: '',
+      venue: 'ACM Multimedia', year: 2026, award: 'Oral',
       desc: 'Synthesizes transition spaces between overlapping rooms while progressively anchoring generated geometry to preserve metric consistency.',
       thumb: 'assets/thumb/mm_2026_thumb.png',
       links: [['Project', 'https://codeshim.github.io/transpace/'], ['Paper', 'assets/transpace_MM_2026.pdf'], ['Code', 'https://github.com/codeshim/transpace']],
